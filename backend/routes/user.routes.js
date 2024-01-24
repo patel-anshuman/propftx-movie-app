@@ -1,0 +1,84 @@
+const express = require("express");
+require("dotenv").config();
+
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const { userModel } = require("../models/user.model");
+
+const userRouter = express.Router();
+
+// Register
+userRouter.post("/user/register", async (req, res) => {
+  try {
+    const { name, email, role, password } = req.body;
+
+    // Check if the user with the given email already exists
+    const existingUser = await userModel.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ msg: "User already exists" });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, +process.env.saltRounds);
+
+    // Create a new user
+    const newUser = new userModel({
+      name,
+      email,
+      role,
+      password: hashedPassword,
+    });
+
+    // Save the new user to the database
+    await newUser.save();
+
+    return res.status(200).json({ msg: "User registered" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Something went wrong" });
+  }
+});
+
+// Login
+userRouter.post("/user/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find the user by email
+    const userData = await userModel.findOne({ email });
+
+    if (!userData) {
+      return res.status(404).json({ msg: "Wrong credentials" });
+    }
+
+    // Compare passwords
+    bcrypt.compare(password, userData.password, function (err, result) {
+      if (result) {
+        // Generate a token on successful login
+        const token = jwt.sign(
+          { name: userData.name, userID: userData._id },
+          process.env.JWT_SECRET_KEY
+        );
+
+        // Send the response with the token and user information
+        return res.status(200).json({
+          msg: "Login successful",
+          token,
+          username: userData.name,
+          userID: userData._id,
+          role: userData.role,
+          email: userData.email,
+        });
+      } else {
+        return res.status(400).json({ msg: "Wrong credentials" });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Something went wrong" });
+  }
+});
+
+module.exports = userRouter;
