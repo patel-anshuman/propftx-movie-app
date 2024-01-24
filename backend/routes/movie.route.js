@@ -6,36 +6,43 @@ const { WatchlistModel } = require("../models/watchlist.model");
 
 const { authenticate } = require("../middleware/authenticate");
 
-const movieRouter = express.Router();
+const movieRouter = express.Router();   // Movie router instance
 
 // Get all movies
 movieRouter.get("/", async (req, res) => {
+  // Parse query parameters for pagination
   const limit = parseInt(req.query.limit) || 15;
   const page = parseInt(req.query.page) || 1;
   const skip = (page - 1) * limit;
 
   try {
+    // Get the total count of movies in the database
     const totalMoviesCount = await MovieModel.countDocuments();
+    
+    // Calculate total pages based on the limit
     const totalPages = Math.ceil(totalMoviesCount / limit);
 
+    // Fetch movies based on pagination parameters
     const movies = await MovieModel.find().skip(skip).limit(limit);
 
+    // Respond with paginated movie data
     res.status(200).json({ total_pages: totalPages, page, movies });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Internal server error", message: error.message });
+    // Handle errors and respond with a 500 status code
+    res.status(500).json({ error: "Internal server error", message: error.message });
   }
 });
 
 // Recommended movies
 movieRouter.get("/recommend/:id", async (req, res) => {
   try {
+    // Extract the movie ID from the request parameters
     const movieId = req.params.id;
 
     // Find the current movie by ID
     const currentMovie = await MovieModel.findById(movieId);
 
+    // Check if the current movie exists
     if (!currentMovie) {
       return res.status(404).json({ message: "Movie not found" });
     }
@@ -49,8 +56,10 @@ movieRouter.get("/recommend/:id", async (req, res) => {
       genre: { $in: genre }, // Find movies with at least one common genre
     }).limit(5);
 
+    // Respond with the recommended movies
     res.status(200).json({ recommendedMovies });
   } catch (error) {
+    // Handle errors and respond with a 500 status code
     console.error("Failed to recommend movies", error);
     res.status(500).json({ message: "Failed to recommend movies" });
   }
@@ -59,13 +68,16 @@ movieRouter.get("/recommend/:id", async (req, res) => {
 // Get watchlist with the same client
 movieRouter.get("/watchlist", authenticate, async (req, res) => {
   try {
-    const userId = req.user._id; // User information is stored in req.user after authentication
+    // Extract the user ID from the authenticated user information (stored in req.user)
+    const userId = req.user._id;
 
-    // Find watchlist entries with the provided user ID
+    // Find watchlist entries with the provided user ID, populate the movies, and sort by watchedAt time (recent to old)
     const watchlist = await WatchlistModel.find({ user: userId }).populate('movies').sort({ watchedAt: -1 });
 
-    res.json({ watchlist });
+    // Respond with the watchlist data
+    res.status(200).json({ watchlist });
   } catch (error) {
+    // Handle errors and respond with a 500 status code
     console.error("Failed to retrieve watchlist", error);
     res.status(500).json({ message: "Failed to retrieve watchlist" });
   }
