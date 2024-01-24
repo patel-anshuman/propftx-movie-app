@@ -9,7 +9,7 @@ const { userModel } = require("../models/user.model");
 const userRouter = express.Router();
 
 // Register
-userRouter.post("/user/register", async (req, res) => {
+userRouter.post("/register", async (req, res) => {
   try {
     const { name, email, role, password } = req.body;
 
@@ -42,7 +42,7 @@ userRouter.post("/user/register", async (req, res) => {
 });
 
 // Login
-userRouter.post("/user/login", async (req, res) => {
+userRouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 

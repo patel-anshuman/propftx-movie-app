@@ -1,54 +1,39 @@
 const jwt = require("jsonwebtoken");
 const { userModel } = require("../models/user.model");
-const fs = require("fs");
 require("dotenv").config();
 
-
-function authenticate(req, res, next) {
-  const token = req.headers.authorization;
+const authenticate = async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
-  if (token) {
-    const blackListData = JSON.parse(
-      fs.readFileSync("blacklist.token.json", "utf-8")
-    );
-    if (blackListData.includes(token)) {
-      res.send("login again user logout");
-    } else {
-      jwt.verify(token, process.env.secret, async (err, decoded) => {
-        if (err) {
-          return res.status(401).json({ message: "Invalid token" });
-        }
 
-        const { userID } = decoded;
-        console.log(decoded)
-        try {
-          const user = await userModel.findById(userID);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const { userID } = decoded;
 
-          if (!user) {
-            return res.status(401).json({ message: "User not found" });
-          }
+    const user = await userModel.findById(userID);
 
-          req.body.customerName = decoded.name;
-          //req.body.userID = decoded.userID;
-          req.body.client = decoded.userID;
-
-          req.user = user;
-          console.log(req.user)
-          next();
-        } catch (error) {
-          console.log(error);
-          return res.status(500).json({ message: "Internal server error" });
-        }
-      });
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
     }
+
+    req.body.customerName = decoded.name;
+    req.body.client = decoded.userID;
+    req.user = user;
+
+    console.log(req.user);
+    next();
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
   }
-
-}
-
-
+};
 
 module.exports = { authenticate };
 

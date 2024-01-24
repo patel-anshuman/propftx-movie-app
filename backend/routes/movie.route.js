@@ -1,14 +1,15 @@
 const express = require("express");
 
-const { MovieModel } = require("../models/movie.model");
 const { UserModel } = require("../models/user.model");
+const { MovieModel } = require("../models/movie.model");
+const { WatchlistModel } = require("../models/watchlist.model");
 
 const { authenticate } = require("../middleware/authenticate");
 
 const movieRouter = express.Router();
 
 // Get all movies
-movieRouter.get("/", authenticate, async (req, res) => {
+movieRouter.get("/", async (req, res) => {
   const limit = parseInt(req.query.limit) || 15;
   const page = parseInt(req.query.page) || 1;
   const skip = (page - 1) * limit;
@@ -28,7 +29,7 @@ movieRouter.get("/", authenticate, async (req, res) => {
 });
 
 // Recommended movies
-movieRouter.get("/movies/recommend/:id", async (req, res) => {
+movieRouter.get("/recommend/:id", async (req, res) => {
   try {
     const movieId = req.params.id;
 
@@ -58,7 +59,7 @@ movieRouter.get("/movies/recommend/:id", async (req, res) => {
 // Get watchlist with the same client
 movieRouter.get("/watchlist", authenticate, async (req, res) => {
   try {
-    const userId = req.user.id; // User information is stored in req.user after authentication
+    const userId = req.user._id; // User information is stored in req.user after authentication
 
     // Find watchlist entries with the provided user ID
     const watchlist = await WatchlistModel.find({ user: userId }).populate('movies').sort({ watchedAt: -1 });
@@ -71,7 +72,7 @@ movieRouter.get("/watchlist", authenticate, async (req, res) => {
 });
 
 // Add a new movie
-movieRouter.post("/movies/add", async (req, res) => {
+movieRouter.post("/add", async (req, res) => {
   try {
     const { title, genre, releaseYear, ratings, image } = req.body;
 
@@ -102,7 +103,7 @@ movieRouter.post("/movies/add", async (req, res) => {
 });
 
 // Update a movie by ID
-movieRouter.put("/movies/update/:id", async (req, res) => {
+movieRouter.put("/update/:id", async (req, res) => {
   try {
     const movieId = req.params.id;
     const { title, genre, releaseYear, ratings, image } = req.body;
@@ -132,7 +133,7 @@ movieRouter.put("/movies/update/:id", async (req, res) => {
 });
 
 // Delete a movie by ID
-movieRouter.delete("/movies/delete/:id", async (req, res) => {
+movieRouter.delete("/delete/:id", async (req, res) => {
   try {
     const movieId = req.params.id;
 
