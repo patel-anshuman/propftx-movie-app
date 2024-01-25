@@ -30,7 +30,8 @@ This application serves as a movie management system, allowing users to browse, 
 - `GET` `/movies`: Retrieve a paginated list of movies.
 - `GET` `/movies/recommend/:id`: Get movie recommendations based on the genre of a given movie.
 - `GET` `/movies/watchlist`: View the watchlist, sorted by the most recently watched movies.
-- `POST` `/movies/add`: Add a new movie.
+- `POST` `/movies/watchlist/add/:movieId`: Add a movie to the user's watchlist (needs token for authentication).
+- `POST` `/movies/add`: Add a new movie to database.
 - `PUT` `/movies/update/:id`: Update a movie by it's ID.
 - `DELETE` `/movies/delete/:id`: Delete a movie by it's ID.
 
