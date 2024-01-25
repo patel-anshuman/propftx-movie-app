@@ -36,3 +36,4 @@ This application serves as a movie management system, allowing users to browse, 
 
 ## Frontend Usage
 
+![Alt text](image.png)

@@ -1,0 +1,16 @@
+h2 {
+    text-align: center;
+    color: #7F7CAF;
+    text-decoration: wavy;
+}
+
+.movies-container {
+    width: 90%;
+    margin-inline: auto;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
