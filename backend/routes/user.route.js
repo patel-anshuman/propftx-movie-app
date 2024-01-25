@@ -4,7 +4,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const { userModel } = require("../models/user.model");
+const { UserModel } = require("../models/user.model");
 
 const userRouter = express.Router();    // User router instance
 
@@ -14,7 +14,7 @@ userRouter.post("/register", async (req, res) => {
     const { name, email, role, password } = req.body;
 
     // Check if the user with the given email already exists
-    const existingUser = await userModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ msg: "User already exists" });
@@ -24,7 +24,7 @@ userRouter.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, +process.env.saltRounds);
 
     // Create a new user
-    const newUser = new userModel({
+    const newUser = new UserModel({
       name,
       email,
       role,
@@ -47,7 +47,7 @@ userRouter.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // Find the user by email
-    const userData = await userModel.findOne({ email });
+    const userData = await UserModel.findOne({ email });
 
     if (!userData) {
       return res.status(404).json({ msg: "Wrong credentials" });

@@ -83,6 +83,36 @@ movieRouter.get("/watchlist", authenticate, async (req, res) => {
   }
 });
 
+// movieRouter.post('/watchlist/add/:movieId', authenticate, async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const movieId = req.params.movieId;
+
+//     return res.status(200).json({ movieId, userId });
+
+//     // Check if the movie exists
+//     const movie = await MovieModel.findById(movieId);
+//     if (!movie) {
+//       return res.status(404).json({ message: 'Movie not found' });
+//     }
+
+//     // Create a new watchlist entry
+//     const watchlistEntry = new WatchlistModel({
+//       user: userId,
+//       movie: movieId,
+//       watchedAt: new Date(),
+//     });
+
+//     // Save the watchlist entry
+//     await watchlistEntry.save();
+
+//     res.status(201).json({ message: 'Movie added to watchlist successfully' });
+//   } catch (error) {
+//     console.error('Failed to add movie to watchlist', error);
+//     res.status(500).json({ message: 'Failed to add movie to watchlist' });
+//   }
+// });
+
 // Add a new movie
 movieRouter.post("/add", async (req, res) => {
   try {
